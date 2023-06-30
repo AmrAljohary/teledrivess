@@ -1,0 +1,48 @@
+services:
+  # A Docker web service
+  - type: web
+    name: teledrive-app
+    runtime: docker
+    repo: https://github.com/DuckyMomo20012/teledrive.git # optional
+    region: singapore # optional (defaults to oregon)
+    plan: free # optional (defaults to starter instance type)
+    branch: main # optional (defaults to master)
+    dockerfilePath: Dockerfile.render
+    envVars:
+      - key: TG_API_ID
+        sync: false # placeholder for a value to be added in the dashboard
+
+      - key: TG_API_HASH
+        sync: false
+
+      - key: ADMIN_USERNAME
+        sync: false
+
+      - key: REDIS_URI
+        fromService:
+          type: redis
+          name: teledrive-redis
+          property: connectionString
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: teledrive-postgres
+          property: connectionString
+
+      - key: API_JWT_SECRET
+        generateValue: true
+
+      - key: FILES_JWT_SECRET
+        generateValue: true
+
+  - type: redis
+    name: teledrive-redis
+    region: singapore
+    plan: free
+    ipAllowList: [] # only allow internal connections
+
+databases:
+  - name: teledrive-postgres
+    region: singapore
+    plan: free
+    databaseName: teledrive # optional (Render may add a suffix)
